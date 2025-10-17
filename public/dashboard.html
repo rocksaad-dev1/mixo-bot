@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Dashboard</h1>
+  <p id="user-info">Loading...</p>
+  <a href="/logout">Logout</a>
+  <h2>Command Settings</h2>
+<form id="command-form">
+  <label><input type="checkbox" name="kick" checked> Enable Kick</label><br>
+  <label><input type="checkbox" name="ban" checked> Enable Ban</label><br>
+  <label><input type="checkbox" name="warn" checked> Enable Warn</label><br>
+  <button type="submit">Save Settings</button>
+</form>
+
+<p id="status-msg"></p>
+
+<script>
+  // Fetch saved settings on load
+  fetch('/api/settings')
+    .then(res => res.json())
+    .then(data => {
+      document.querySelector('[name=kick]').checked = data.kick;
+      document.querySelector('[name=ban]').checked = data.ban;
+      document.querySelector('[name=warn]').checked = data.warn;
+    });
+
+  // Save settings
+  document.getElementById('command-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const settings = {
+      kick: document.querySelector('[name=kick]').checked,
+      ban: document.querySelector('[name=ban]').checked,
+      warn: document.querySelector('[name=warn]').checked
+    };
+    fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(settings)
+    }).then(() => {
+      document.getElementById('status-msg').innerText = 'Settings saved!';
+    });
+  });
+</script>
+
+
+  <script>
+    fetch('/api/user')
+      .then(res => res.json())
+      .then(user => {
+        document.getElementById('user-info').innerText = `Logged in as ${user.username}#${user.discriminator}`;
+      })
+      .catch(() => {
+        document.getElementById('user-info').innerText = 'Not logged in.';
+      });
+  </script>
+</body>
+</html>
